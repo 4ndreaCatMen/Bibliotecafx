@@ -1,23 +1,25 @@
 <hibernate-configuration>
     <session-factory>
-        <!-- Configuración de conexión a MySQL -->
+        <!-- Driver y URL de MySQL -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/Biblioteca?useSSL=false&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/biblioteca</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">root</property>
 
-        <!-- Dialecto para MySQL -->
-        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <!-- Dialecto de MySQL -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
-        <!-- Actualización automática de la base de datos -->
+        <!-- Para que cree las tablas automáticamente -->
         <property name="hibernate.hbm2ddl.auto">update</property>
 
-        <!-- Mostrar consultas SQL en consola -->
+        <!-- Muestra las consultas SQL en la consola -->
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-        <!-- Mapeo de entidades -->
+        <!-- Clases mapeadas -->
         <mapping class="org.example.modelo.Libro"/>
         <mapping class="org.example.modelo.Autor"/>
+        <mapping class="org.example.modelo.Socio"/>
+        <mapping class="org.example.modelo.Prestamo"/>
     </session-factory>
 </hibernate-configuration>
