@@ -8,7 +8,7 @@ public class Autor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(nullable = false)
     private String nombre;
@@ -26,7 +26,8 @@ public class Autor {
     }
 
     // Getters y Setters
-    public Long getId() {
+    public int getId() {
+
         return id;
     }
 
@@ -35,14 +36,17 @@ public class Autor {
     }
 
     public void setNombre(String nombre) {
+
         this.nombre = nombre;
     }
 
     public String getNacionalidad() {
+
         return nacionalidad;
     }
 
     public void setNacionalidad(String nacionalidad) {
+
         this.nacionalidad = nacionalidad;
     }
 

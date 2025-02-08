@@ -14,4 +14,7 @@ public interface ISocioDAO {
     Socio buscarPorId(int id);
 
     List<Socio> listarTodos();
+    List<Socio> buscarPorNombre(String nombre);
+    List<Socio> buscarPorTelefono(String telefono);
+
 }

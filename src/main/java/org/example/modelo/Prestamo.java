@@ -9,7 +9,7 @@ public class Prestamo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "socio_id", nullable = false)
@@ -37,39 +37,48 @@ public class Prestamo {
     }
 
     // Getters y Setters
-    public Long getId() {
+    public int getId() {
+
         return id;
     }
 
     public Socio getSocio() {
+
         return socio;
     }
 
     public void setSocio(Socio socio) {
+
         this.socio = socio;
     }
 
     public Libro getLibro() {
+
         return libro;
     }
 
     public void setLibro(Libro libro) {
+
         this.libro = libro;
     }
 
     public LocalDate getFechaPrestamo() {
+
         return fechaPrestamo;
     }
 
     public void setFechaPrestamo(LocalDate fechaPrestamo) {
+
         this.fechaPrestamo = fechaPrestamo;
     }
 
     public LocalDate getFechaDevolucion() {
+
         return fechaDevolucion;
     }
 
     public void setFechaDevolucion(LocalDate fechaDevolucion) {
+
         this.fechaDevolucion = fechaDevolucion;
     }
 

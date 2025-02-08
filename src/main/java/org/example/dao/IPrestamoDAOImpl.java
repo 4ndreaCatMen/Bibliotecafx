@@ -50,4 +50,20 @@ public class IPrestamoDAOImpl implements IPrestamoDAO {
         session.close();
         return prestamos;
     }
+
+    public List<Prestamo> listarPrestamosActivos() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Prestamo> prestamos = session.createQuery("FROM Prestamo WHERE fechaDevolucion IS NULL", Prestamo.class).list();
+        session.close();
+        return prestamos;
+    }
+
+    @Override
+    public List<Prestamo> listarHistorialPorSocio(int idSocio) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Prestamo> prestamos = session.createQuery("FROM Prestamo WHERE socio.id = :idSocio", Prestamo.class)
+                .setParameter("idSocio", idSocio).list();
+        session.close();
+        return prestamos;
+    }
 }

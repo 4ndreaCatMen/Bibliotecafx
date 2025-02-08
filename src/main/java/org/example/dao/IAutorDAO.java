@@ -14,4 +14,6 @@ public interface IAutorDAO {
     Autor buscarPorId(int id);
 
     List<Autor> listarTodos();
+    List<Autor> buscarPorNombre(String nombre);
+
 }

@@ -50,4 +50,12 @@ public class IAutorDAOImpl implements IAutorDAO {
         session.close();
         return autores;
     }
+    @Override
+    public List<Autor> buscarPorNombre(String nombre) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Autor> autores = session.createQuery("FROM Autor WHERE nombre LIKE :nombre", Autor.class)
+                .setParameter("nombre", "%" + nombre + "%").list();
+        session.close();
+        return autores;
+        }
 }

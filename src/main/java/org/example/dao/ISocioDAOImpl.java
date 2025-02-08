@@ -50,6 +50,24 @@ public class ISocioDAOImpl implements ISocioDAO {
         session.close();
         return socios;
     }
+
+    @Override
+    public List<Socio> buscarPorNombre(String nombre) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Socio> socios = session.createQuery("FROM Socio WHERE nombre LIKE :nombre", Socio.class)
+                .setParameter("nombre", "%" + nombre + "%").list();
+        session.close();
+        return socios;
+    }
+
+    @Override
+    public List<Socio> buscarPorTelefono(String telefono) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Socio> socios = session.createQuery("FROM Socio WHERE telefono = :telefono", Socio.class)
+                .setParameter("telefono", telefono).list();
+        session.close();
+        return socios;
+    }
 }
 
 

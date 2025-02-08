@@ -14,4 +14,7 @@ public interface IPrestamoDAO {
     Prestamo buscarPorId(int id);
 
     List<Prestamo> listarTodos();
+    List<Prestamo> listarPrestamosActivos();
+    List<Prestamo> listarHistorialPorSocio(int idSocio);
+
 }
