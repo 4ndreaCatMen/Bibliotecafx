@@ -5,7 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.example.dao.HibernateUtil;
+import org.example.util.HibernateUtil;
 
 public class Main extends Application {
 
