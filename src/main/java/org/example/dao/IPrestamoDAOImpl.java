@@ -66,4 +66,15 @@ public class IPrestamoDAOImpl implements IPrestamoDAO {
         session.close();
         return prestamos;
     }
+    @Override
+    public List<Prestamo> obtenerPrestamosActivos() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Prestamo> prestamosActivos = session.createQuery(
+                "FROM Prestamo WHERE fechaDevolucion IS NULL",
+                Prestamo.class
+        ).getResultList();
+        session.close();
+        return prestamosActivos;
+    }
+
 }
