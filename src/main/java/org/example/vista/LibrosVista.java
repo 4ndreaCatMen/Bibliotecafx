@@ -6,21 +6,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.example.dao.ILibroDAO;
-import org.example.dao.ILibroDAOImpl;
 import org.example.dao.IAutorDAO;
 import org.example.dao.IAutorDAOImpl;
+import org.example.dao.ILibroDAO;
+import org.example.dao.ILibroDAOImpl;
 import org.example.modelo.Libro;
-import org.example.modelo.Autor;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-
 import java.util.List;
 
 public class LibrosVista {
     private final ILibroDAO libroDAO = new ILibroDAOImpl();
     private final IAutorDAO autorDAO = new IAutorDAOImpl();
-    private ObservableList<Libro> listaLibros;
+    private ObservableList<Libro> listaLibros = FXCollections.observableArrayList();
     private TableView<Libro> tablaLibros;
     private TextField campoBusqueda;
     private ComboBox<String> tipoBusqueda;
@@ -35,9 +31,9 @@ public class LibrosVista {
         inicializarBusqueda(layout);
         inicializarTabla();
         inicializarBotones(layout);
+
         Button actualizarBtn = new Button("Actualizar Lista");
         actualizarBtn.setOnAction(e -> cargarLibros());
-
         layout.getChildren().addAll(tablaLibros, actualizarBtn);
 
         Scene escena = new Scene(layout, 700, 500);
@@ -48,6 +44,8 @@ public class LibrosVista {
     }
 
     private void cargarLibros() {
+        List<Libro> librosDisponibles = libroDAO.listarDisponibles();
+        listaLibros.setAll(librosDisponibles);
     }
 
     private void inicializarBusqueda(VBox layout) {
@@ -65,27 +63,35 @@ public class LibrosVista {
     }
 
     private void buscarLibros() {
+        String criterio = campoBusqueda.getText().trim();
+        String tipo = tipoBusqueda.getValue();
+
+        List<Libro> resultado;
+        if ("Título".equals(tipo)) {
+            resultado = libroDAO.buscarPorTitulo(criterio);
+        } else if ("Autor".equals(tipo)) {
+            resultado = libroDAO.buscarPorAutor(criterio);
+        } else {
+            resultado = libroDAO.buscarPorISBN(criterio);
+        }
+
+        listaLibros.setAll(resultado);
     }
 
     private void inicializarTabla() {
-        tablaLibros = new TableView<>();
+        tablaLibros = new TableView<>(listaLibros);
+        tablaLibros.getColumns().addAll(
+                crearColumna("Título", "titulo"),
+                crearColumna("ISBN", "isbn"),
+                crearColumna("Editorial", "editorial"),
+                crearColumna("Año", "anioPublicacion")
+        );
+    }
 
-        TableColumn<Libro, Integer> columnaId = new TableColumn<>("ID");
-        columnaId.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getId()));
-
-        TableColumn<Libro, String> columnaTitulo = new TableColumn<>("Título");
-        columnaTitulo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTitulo()));
-
-        TableColumn<Libro, String> columnaISBN = new TableColumn<>("ISBN");
-        columnaISBN.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIsbn()));
-
-        TableColumn<Libro, String> columnaEditorial = new TableColumn<>("Editorial");
-        columnaEditorial.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEditorial()));
-
-        TableColumn<Libro, Integer> columnaAnio = new TableColumn<>("Año");
-        columnaAnio.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getAnioPublicacion()));
-
-        tablaLibros.getColumns().addAll(columnaId, columnaTitulo, columnaISBN, columnaEditorial, columnaAnio);
+    private TableColumn<Libro, String> crearColumna(String titulo, String propiedad) {
+        TableColumn<Libro, String> columna = new TableColumn<>(titulo);
+        columna.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>(propiedad));
+        return columna;
     }
 
     private void inicializarBotones(VBox layout) {
@@ -102,6 +108,20 @@ public class LibrosVista {
     }
 
     private void agregarLibro() {
+        Libro nuevoLibro = new Libro("Nuevo Libro", "0000000000", "Editorial X", 2023, null);
+        libroDAO.guardar(nuevoLibro);
+        cargarLibros();
+    }
+
+    private void modificarLibro() {
+        Libro seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
+        if (seleccionado != null) {
+            seleccionado.setTitulo(seleccionado.getTitulo() + " (Modificado)");
+            libroDAO.actualizar(seleccionado);
+            cargarLibros();
+        } else {
+            mostrarAlerta("Seleccione un libro para modificar.");
+        }
     }
 
     private void eliminarLibro() {
@@ -114,66 +134,11 @@ public class LibrosVista {
         }
     }
 
-    private void mostrarAlerta(String s) {
-    }
-
-    private void modificarLibro() {
-        Libro seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            mostrarAlerta("Seleccione un libro para modificar.");
-            return;
-        }
-
-        Dialog<String> dialogo = new Dialog<>();
-        dialogo.setTitle("Modificar Libro");
-        dialogo.setHeaderText("Modifique los detalles del libro");
-
-        VBox contenido = new VBox(10);
-        TextField tituloField = new TextField(seleccionado.getTitulo());
-        TextField isbnField = new TextField(seleccionado.getIsbn());
-        TextField editorialField = new TextField(seleccionado.getEditorial());
-        TextField anioField = new TextField(String.valueOf(seleccionado.getAnioPublicacion()));
-
-        ComboBox<Autor> autorCombo = new ComboBox<>(FXCollections.observableArrayList(autorDAO.listarTodos()));
-        autorCombo.setValue(seleccionado.getAutor());
-
-        contenido.getChildren().addAll(new Label("Título:"), tituloField,
-                new Label("ISBN:"), isbnField,
-                new Label("Editorial:"), editorialField,
-                new Label("Año:"), anioField,
-                new Label("Autor:"), autorCombo);
-
-        dialogo.getDialogPane().setContent(contenido);
-        dialogo.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialogo.setResultConverter(boton -> {
-            if (boton == ButtonType.OK) {
-                try {
-                    String titulo = tituloField.getText().trim();
-                    String isbn = isbnField.getText().trim();
-                    String editorial = editorialField.getText().trim();
-                    int anio = Integer.parseInt(anioField.getText().trim());
-                    Autor autorSeleccionado = autorCombo.getValue();
-
-                    if (titulo.isEmpty() || isbn.isEmpty() || editorial.isEmpty() || autorSeleccionado == null) {
-                        mostrarAlerta("Todos los campos son obligatorios.");
-                        return null;
-                    }
-
-                    seleccionado.setTitulo(titulo);
-                    seleccionado.setIsbn(isbn);
-                    seleccionado.setEditorial(editorial);
-                    seleccionado.setAnioPublicacion(anio);
-                    seleccionado.setAutor(autorSeleccionado);
-                    libroDAO.actualizar(seleccionado);
-                    cargarLibros();
-                } catch (NumberFormatException e) {
-                    mostrarAlerta("El año debe ser un número válido.");
-                }
-            }
-            return null;
-        });
-
-        dialogo.showAndWait();
+    private void mostrarAlerta(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING);
+        alerta.setTitle("Advertencia");
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }

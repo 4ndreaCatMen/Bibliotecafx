@@ -81,8 +81,12 @@ public class ILibroDAOImpl implements ILibroDAO {
     @Override
     public List<Libro> listarDisponibles() {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Libro> libros = session.createQuery("SELECT l FROM Libro l WHERE l.id NOT IN (SELECT p.libro.id FROM Prestamo p WHERE p.fechaDevolucion IS NULL)", Libro.class).list();
+        List<Libro> libros = session.createQuery(
+                "SELECT l FROM Libro l WHERE l.id NOT IN (SELECT p.libro.id FROM Prestamo p WHERE p.fechaDevolucion IS NULL)",
+                Libro.class
+        ).list();
         session.close();
         return libros;
     }
 }
+

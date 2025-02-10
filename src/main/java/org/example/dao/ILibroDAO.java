@@ -18,6 +18,4 @@ public interface ILibroDAO {
     List<Libro> buscarPorAutor(String nombreAutor);
     List<Libro> buscarPorISBN(String isbn);
     List<Libro> listarDisponibles();
-
-
 }
