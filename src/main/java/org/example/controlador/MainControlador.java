@@ -11,22 +11,22 @@ public class MainControlador {
 
     @FXML
     private void abrirLibros() throws IOException {
-        cargarVentana("/org/example/vista/libros-vista.fxml", "Gestión de Libros");
+        cargarVentana("/vista/libros-vista.fxml", "Gestión de Libros");
     }
 
     @FXML
     private void abrirAutores() throws IOException {
-        cargarVentana("/org/example/vista/autores-vista.fxml", "Gestión de Autores");
+        cargarVentana("/vista/autores-vista.fxml", "Gestión de Autores");
     }
 
     @FXML
     private void abrirPrestamos() throws IOException {
-        cargarVentana("/org/example/vista/prestamos-vista.fxml", "Gestión de Préstamos");
+        cargarVentana("/vista/prestamos-vista.fxml", "Gestión de Préstamos");
     }
 
     @FXML
     private void abrirSocios() throws IOException {
-        cargarVentana("/org/example/vista/socios-vista.fxml", "Gestión de Socios");
+        cargarVentana("/vista/socios-vista.fxml", "Gestión de Socios");
     }
 
     private void cargarVentana(String rutaFXML, String titulo) throws IOException {
