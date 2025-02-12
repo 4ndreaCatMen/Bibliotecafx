@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -11,4 +8,34 @@
             fx:controller="org.example.controlador.AutorControlador"
             prefHeight="400.0" prefWidth="600.0">
 
+    <VBox spacing="10" alignment="CENTER" layoutX="20" layoutY="20" prefWidth="560">
+
+        <!-- TableView para mostrar autores -->
+        <TableView fx:id="autoresTable" prefHeight="200" prefWidth="560">
+            <columns>
+                <TableColumn fx:id="nombreColumn" text="Nombre" prefWidth="280" />
+                <TableColumn fx:id="nacionalidadColumn" text="Nacionalidad" prefWidth="280" />
+            </columns>
+        </TableView>
+
+        <!-- Campos de entrada -->
+        <HBox spacing="10">
+            <TextField fx:id="nombreField" promptText="Nombre del Autor" />
+            <TextField fx:id="nacionalidadField" promptText="Nacionalidad" />
+        </HBox>
+
+        <!-- Botones de acción -->
+        <HBox spacing="10">
+            <Button text="Agregar" onAction="#agregarAutor" />
+            <Button text="Eliminar" onAction="#eliminarAutor" />
+            <Button text="Actualizar" onAction="#actualizarAutor" />
+        </HBox>
+
+        <!-- Campo de búsqueda -->
+        <HBox spacing="10">
+            <TextField fx:id="buscarField" promptText="Buscar por nombre" />
+            <Button text="Buscar" onAction="#buscarAutor" />
+        </HBox>
+
+    </VBox>
 </AnchorPane>

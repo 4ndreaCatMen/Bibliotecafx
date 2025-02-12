@@ -9,8 +9,8 @@
         <!-- Dialecto de MySQL -->
         <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
-        <!-- Para que cree las tablas automáticamente -->
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <!-- elimine y cree la base de datos cada vez que se ejecute la aplicación SOLO PRUEBAS-->
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
 
         <!-- Muestra las consultas SQL en la consola -->
         <property name="hibernate.show_sql">true</property>
