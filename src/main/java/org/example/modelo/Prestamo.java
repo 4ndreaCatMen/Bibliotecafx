@@ -1,6 +1,6 @@
 package org.example.modelo;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
