@@ -9,7 +9,7 @@ module org.example.biblioteca {
     // Abrir paquetes para Hibernate
     opens org.example.modelo to org.hibernate.orm.core, jakarta.persistence;
 
-    // Abrir paquetes para JavaFX (para cargar vistas y controladores correctamente)
+    // Abrir paquetes para JavaFX
     opens org.example.vista to javafx.fxml;
     opens org.example.controlador to javafx.fxml;
 
