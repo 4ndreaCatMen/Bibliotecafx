@@ -34,7 +34,8 @@
         <!-- Campo de búsqueda -->
         <HBox spacing="10">
             <TextField fx:id="buscarField" promptText="Buscar por nombre" />
-            <Button text="Buscar" onAction="#buscarAutor" />
+            <Button fx:id="buscarButton" text="Buscar Autor" />
+
         </HBox>
 
     </VBox>

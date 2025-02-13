@@ -7,7 +7,7 @@
       fx:controller="org.example.controlador.MainControlador" spacing="10"
       alignment="CENTER">
 
-    <Label text="Biblioteca BookScapes" style="-fx-font-size: 100 px; -fx-font-weight: bold;"/>
+    <Label text="Biblioteca BookScapes" style="-fx-font-size: 50 px; -fx-font-weight: bold;"/>
 
     <Button text="Gestión de Libros" onAction="#abrirLibros"/>
     <Button text="Gestión de Autores" onAction="#abrirAutores"/>

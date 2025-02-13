@@ -4,6 +4,9 @@ import org.example.modelo.Autor;
 import org.example.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+import java.util.Collections;
 import java.util.List;
 
 // Implementación del DAO para Autor
@@ -19,12 +22,16 @@ public class IAutorDAOImpl implements IAutorDAO {
 
     @Override
     public void actualizar(Autor autor) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.update(autor);
-        tx.commit();
-        session.close();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            session.merge(autor); // Usamos merge en lugar de update
+            tx.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
 
     @Override
     public void eliminar(Autor autor) {
@@ -52,10 +59,28 @@ public class IAutorDAOImpl implements IAutorDAO {
     }
     @Override
     public List<Autor> buscarPorNombre(String nombre) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Autor> autores = session.createQuery("FROM Autor WHERE nombre LIKE :nombre", Autor.class)
-                .setParameter("nombre", "%" + nombre + "%").list();
-        session.close();
-        return autores;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            System.out.println("Ejecutando búsqueda con nombre: " + nombre);
+
+            List<Autor> autores = session.createQuery(
+                            "FROM Autor a WHERE LOWER(a.nombre) LIKE LOWER(:nombre)", Autor.class)
+                    .setParameter("nombre", "%" + nombre.toLowerCase() + "%")
+                    .getResultList();
+
+            System.out.println("Resultados encontrados en la BD: " + autores);
+            return autores;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
+    }
+
+
+
+
+
 }
+
+
+
+

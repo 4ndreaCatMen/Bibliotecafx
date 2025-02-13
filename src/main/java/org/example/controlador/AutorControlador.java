@@ -34,14 +34,27 @@ public class AutorControlador {
     private final ObservableList<Autor> autoresList = FXCollections.observableArrayList();
 
     public void initialize() {
+        System.out.println("AutorControlador inicializado");
+
+        if (buscarButton == null) {
+            System.out.println("Error: buscarButton es null. Verifica el fx:id en el archivo FXML.");
+        } else {
+            buscarButton.setOnAction(e -> buscarAutor());
+        }
+
+        if (actualizarButton == null) {
+            System.out.println("Error: actualizarButton es null. Verifica el fx:id en el archivo FXML.");
+        } else {
+            actualizarButton.setOnAction(e -> actualizarAutor());
+        }
+
         nombreColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
         nacionalidadColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNacionalidad()));
         autoresTable.setItems(autoresList);
         cargarAutores();
-
-        buscarButton.setOnAction(e -> buscarAutor());
-        actualizarButton.setOnAction(e -> actualizarAutor());
     }
+
+
 
     @FXML
     private void agregarAutor() {
@@ -73,29 +86,39 @@ public class AutorControlador {
     @FXML
     private void buscarAutor() {
         String nombre = buscarField.getText();
+        System.out.println("Buscando autor con nombre: " + nombre);
+
         if (!nombre.isEmpty()) {
             List<Autor> resultados = autorDAO.buscarPorNombre(nombre);
+            System.out.println("Resultados encontrados: " + resultados);
             autoresList.setAll(resultados);
         } else {
             cargarAutores();
         }
     }
 
+
     @FXML
     private void actualizarAutor() {
         Autor autorSeleccionado = autoresTable.getSelectionModel().getSelectedItem();
         if (autorSeleccionado != null) {
+            System.out.println("Antes de actualizar: " + autorSeleccionado);
+
             autorSeleccionado.setNombre(nombreField.getText());
             autorSeleccionado.setNacionalidad(nacionalidadField.getText());
             autorDAO.actualizar(autorSeleccionado);
+
+            System.out.println("Después de actualizar: " + autorSeleccionado);
             cargarAutores();
         } else {
             mostrarAlerta("Error", "Seleccione un autor para actualizar");
         }
     }
 
+
     private void cargarAutores() {
         List<Autor> autores = autorDAO.listarTodos();
+        System.out.println("Autores cargados después de actualizar: " + autores);
         autoresList.setAll(autores);
     }
 

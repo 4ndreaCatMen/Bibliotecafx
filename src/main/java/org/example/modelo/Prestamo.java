@@ -26,7 +26,7 @@ public class Prestamo {
     private LocalDate fechaDevolucion;
 
     // Constructor vacío obligatorio para Hibernate
-    public Prestamo() {}
+    public Prestamo(LocalDate of, LocalDate localDate, Libro la_ciudad_y_los_perros, Socio andrea_catalán) {}
 
     // Constructor con parámetros
     public Prestamo(Socio socio, Libro libro, LocalDate fechaPrestamo, LocalDate fechaDevolucion) {
