@@ -2,7 +2,7 @@ package org.example.modelo;
 
 import jakarta.persistence.*;
 @Entity
-@Table(name = "libros")
+@Table(name = "Libros")
 public class Libro {
 
     @Id
@@ -20,6 +20,10 @@ public class Libro {
 
     @Column
     private int anioPublicacion;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean disponible = true;
+
 
     @ManyToOne
     @JoinColumn(name = "autor_id", nullable = false)
@@ -105,4 +109,6 @@ public class Libro {
                 ", autor=" + autor.getNombre() +
                 '}';
     }
+
+
 }

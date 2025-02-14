@@ -10,22 +10,41 @@ import java.util.List;
 public class ISocioDAOImpl implements ISocioDAO {
     @Override
     public void guardar(Socio socio) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.save(socio);
-        tx.commit();
-        session.close();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            session.persist(socio);
+            tx.commit();
+        }
     }
 
     @Override
     public void actualizar(Socio socio) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.update(socio);
-        tx.commit();
-        session.close();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = null;
+            try {
+                tx = session.beginTransaction();
+
+                // Usamos merge en lugar de update para evitar NonUniqueObjectException
+                Socio socioActualizado = (Socio) session.merge(socio);
+
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) tx.rollback(); // Rollback en caso de error
+                throw new RuntimeException("Error actualizando socio: " + e.getMessage(), e);
+            }
+        }
     }
 
+
+    @Override
+    public List<Socio> buscarPorNombre(String nombre) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                            "FROM Socio WHERE LOWER(nombre) LIKE LOWER(:nombre)", Socio.class)
+                    .setParameter("nombre", "%" + nombre + "%")
+                    .list();
+        }
+    }
     @Override
     public void eliminar(Socio socio) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -47,15 +66,6 @@ public class ISocioDAOImpl implements ISocioDAO {
     public List<Socio> listarTodos() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Socio> socios = session.createQuery("FROM Socio", Socio.class).list();
-        session.close();
-        return socios;
-    }
-
-    @Override
-    public List<Socio> buscarPorNombre(String nombre) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Socio> socios = session.createQuery("FROM Socio WHERE nombre LIKE :nombre", Socio.class)
-                .setParameter("nombre", "%" + nombre + "%").list();
         session.close();
         return socios;
     }

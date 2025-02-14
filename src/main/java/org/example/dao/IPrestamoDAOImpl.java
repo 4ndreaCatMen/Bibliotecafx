@@ -1,86 +1,134 @@
 package org.example.dao;
 
+import org.example.modelo.Libro;
 import org.example.modelo.Prestamo;
 import org.example.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import java.time.LocalDate;
 import java.util.List;
 
 public class IPrestamoDAOImpl implements IPrestamoDAO {
+
     @Override
     public void guardar(Prestamo prestamo) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = null;
+            try {
+                tx = session.beginTransaction();
 
-        Long count = session.createQuery(
-                        "SELECT COUNT(p) FROM Prestamo p WHERE p.libro.id = :libroId AND (p.fechaDevolucion IS NULL OR p.fechaDevolucion > CURRENT_DATE)",
-                        Long.class
-                ).setParameter("libroId", prestamo.getLibro().getId())
-                .getSingleResult();
+                // Verificar disponibilidad del libro
+                Long count = session.createQuery(
+                                "SELECT COUNT(p) FROM Prestamo p WHERE p.libro.id = :libroId " +
+                                        "AND p.fechaDevolucionReal IS NULL", Long.class)
+                        .setParameter("libroId", prestamo.getLibro().getId())
+                        .getSingleResult();
 
-        if (count > 0) {
-            System.out.println("El libro ya está prestado y no se puede volver a prestar.");
-        } else {
-            session.save(prestamo);
-            tx.commit();
+                if (count > 0) {
+                    throw new IllegalStateException("El libro ya está prestado");
+                }
+
+                // Establecer fechas por defecto
+                if (prestamo.getFechaPrestamo() == null) {
+                    prestamo.setFechaPrestamo(LocalDate.now());
+                }
+
+                // Actualizar estado del libro
+                Libro libro = prestamo.getLibro();
+                libro.setDisponible(false);
+                session.persist(prestamo);
+                session.update(libro);
+
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) tx.rollback();
+                throw new RuntimeException("Error al guardar préstamo: " + e.getMessage(), e);
+            }
         }
-
-        session.close();
     }
-
 
     @Override
     public void actualizar(Prestamo prestamo) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.update(prestamo);
-        tx.commit();
-        session.close();
-    }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = null;
+            try {
+                tx = session.beginTransaction();
 
+                Prestamo prestamoActualizado = session.merge(prestamo);
+
+                // Si se registra la devolución real
+                if (prestamoActualizado.getFechaDevolucionReal() != null) {
+                    Libro libro = prestamoActualizado.getLibro();
+                    libro.setDisponible(true);
+                    session.update(libro);
+                }
+
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) tx.rollback();
+                throw new RuntimeException("Error al actualizar préstamo: " + e.getMessage(), e);
+            }
+        }
+    }
 
     @Override
     public void eliminar(Prestamo prestamo) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.delete(prestamo);
-        tx.commit();
-        session.close();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = null;
+            try {
+                tx = session.beginTransaction();
+
+                // Recargar el préstamo para asegurar el estado actual
+                Prestamo prestamoManaged = session.get(Prestamo.class, prestamo.getId());
+
+                // Restaurar disponibilidad del libro si estaba activo
+                if (prestamoManaged.getFechaDevolucionReal() == null) {
+                    Libro libro = prestamoManaged.getLibro();
+                    libro.setDisponible(true);
+                    session.update(libro);
+                }
+
+                session.delete(prestamoManaged);
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) tx.rollback();
+                throw new RuntimeException("Error al eliminar préstamo: " + e.getMessage(), e);
+            }
+        }
     }
 
     @Override
     public Prestamo buscarPorId(int id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Prestamo prestamo = session.get(Prestamo.class, id);
-        session.close();
-        return prestamo;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.get(Prestamo.class, id);
+        }
     }
 
     @Override
     public List<Prestamo> listarTodos() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Prestamo> prestamos = session.createQuery("FROM Prestamo", Prestamo.class).list();
-        session.close();
-        return prestamos;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Prestamo", Prestamo.class).getResultList();
+        }
     }
 
     @Override
     public List<Prestamo> listarPrestamosActivos() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Prestamo> prestamos = session.createQuery(
-                "FROM Prestamo WHERE fechaDevolucion IS NULL", Prestamo.class
-        ).list();
-        session.close();
-        return prestamos;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "FROM Prestamo WHERE fechaDevolucionReal IS NULL",
+                    Prestamo.class
+            ).getResultList();
+        }
     }
 
     @Override
     public List<Prestamo> listarHistorialPorSocio(int idSocio) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Prestamo> prestamos = session.createQuery(
-                "FROM Prestamo WHERE socio.id = :idSocio", Prestamo.class
-        ).setParameter("idSocio", idSocio).list();
-        session.close();
-        return prestamos;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                            "FROM Prestamo WHERE socio.id = :idSocio ORDER BY fechaPrestamo DESC",
+                            Prestamo.class
+                    ).setParameter("idSocio", idSocio)
+                    .getResultList();
+        }
     }
 }

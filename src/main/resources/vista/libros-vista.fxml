@@ -9,6 +9,43 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.controlador.LibroControlador"
-            prefHeight="400.0" prefWidth="600.0">
+            prefHeight="600.0" prefWidth="800.0" stylesheets="@../css/styles.css">
 
+    <VBox spacing="10" layoutX="10" layoutY="10" prefWidth="780" prefHeight="580">
+        <Label text="Gestión de Libros" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+        <HBox spacing="10">
+            <TextField fx:id="buscarField" promptText="Buscar libro por título"/>
+            <Button text="Buscar" onAction="#buscarLibro"/>
+        </HBox>
+
+        <HBox spacing="10">
+            <TextField fx:id="tituloField" promptText="Título"/>
+            <TextField fx:id="isbnField" promptText="ISBN"/>
+        </HBox>
+
+        <HBox spacing="10">
+            <TextField fx:id="editorialField" promptText="Editorial"/>
+            <TextField fx:id="anioField" promptText="Año de publicación"/>
+            <ComboBox fx:id="autorComboBox" promptText="Seleccione un Autor"/>
+        </HBox>
+
+
+        <HBox spacing="10">
+            <Button text="Añadir" onAction="#agregarLibro"/>
+            <Button text="Editar" onAction="#editarLibro"/>
+            <Button text="Eliminar" onAction="#eliminarLibro"/>
+            <Button text="Listar Todos" onAction="#cargarLibros"/>
+        </HBox>
+
+        <TableView fx:id="librosTable" prefHeight="300">
+            <columns>
+                <TableColumn fx:id="tituloColumn" text="Título"/>
+                <TableColumn fx:id="isbnColumn" text="ISBN"/>
+                <TableColumn fx:id="autorColumn" text="Autor"/>
+                <TableColumn fx:id="editorialColumn" text="Editorial"/>
+                <TableColumn fx:id="anioPublicacionColumn" text="Año de publicación"/>
+            </columns>
+        </TableView>
+    </VBox>
 </AnchorPane>
