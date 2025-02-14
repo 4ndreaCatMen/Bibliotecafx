@@ -8,7 +8,6 @@ import javafx.scene.control.*;
 import org.example.dao.IAutorDAO;
 import org.example.dao.IAutorDAOImpl;
 import org.example.modelo.Autor;
-
 import java.util.List;
 
 public class AutorControlador {
@@ -24,6 +23,8 @@ public class AutorControlador {
     @FXML
     private Button actualizarButton;
     @FXML
+    private Button eliminarButton;
+    @FXML
     private TableView<Autor> autoresTable;
     @FXML
     private TableColumn<Autor, String> nombreColumn;
@@ -34,27 +35,14 @@ public class AutorControlador {
     private final ObservableList<Autor> autoresList = FXCollections.observableArrayList();
 
     public void initialize() {
-        System.out.println("AutorControlador inicializado");
-
-        if (buscarButton == null) {
-            System.out.println("Error: buscarButton es null. Verifica el fx:id en el archivo FXML.");
-        } else {
-            buscarButton.setOnAction(e -> buscarAutor());
-        }
-
-        if (actualizarButton == null) {
-            System.out.println("Error: actualizarButton es null. Verifica el fx:id en el archivo FXML.");
-        } else {
-            actualizarButton.setOnAction(e -> actualizarAutor());
-        }
-
         nombreColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
         nacionalidadColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNacionalidad()));
+        autoresTable.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> handleSeleccionAutor()
+        );
         autoresTable.setItems(autoresList);
         cargarAutores();
     }
-
-
 
     @FXML
     private void agregarAutor() {
@@ -86,39 +74,61 @@ public class AutorControlador {
     @FXML
     private void buscarAutor() {
         String nombre = buscarField.getText();
-        System.out.println("Buscando autor con nombre: " + nombre);
-
         if (!nombre.isEmpty()) {
             List<Autor> resultados = autorDAO.buscarPorNombre(nombre);
-            System.out.println("Resultados encontrados: " + resultados);
             autoresList.setAll(resultados);
         } else {
             cargarAutores();
         }
     }
 
-
     @FXML
     private void actualizarAutor() {
         Autor autorSeleccionado = autoresTable.getSelectionModel().getSelectedItem();
-        if (autorSeleccionado != null) {
-            System.out.println("Antes de actualizar: " + autorSeleccionado);
 
-            autorSeleccionado.setNombre(nombreField.getText());
-            autorSeleccionado.setNacionalidad(nacionalidadField.getText());
+        if (autorSeleccionado == null) {
+            mostrarAlerta("Error", "Seleccione un autor para editar");
+            return;
+        }
+
+        String nuevoNombre = nombreField.getText();
+        String nuevaNacionalidad = nacionalidadField.getText();
+
+        if (nuevoNombre.isEmpty() || nuevaNacionalidad.isEmpty()) {
+            mostrarAlerta("Error", "Todos los campos son obligatorios");
+            return;
+        }
+
+        try {
+            // Actualiza los datos del autor
+            autorSeleccionado.setNombre(nuevoNombre);
+            autorSeleccionado.setNacionalidad(nuevaNacionalidad);
+
+            // Persiste los cambios en la base de datos
             autorDAO.actualizar(autorSeleccionado);
 
-            System.out.println("Después de actualizar: " + autorSeleccionado);
+            // Actualiza la tabla
             cargarAutores();
-        } else {
-            mostrarAlerta("Error", "Seleccione un autor para actualizar");
+            limpiarCampos();
+
+        } catch (Exception e) {
+            mostrarAlerta("Error", "No se pudo actualizar el autor: " + e.getMessage());
         }
     }
 
+    // Añade esto para cargar los datos del autor seleccionado en los campos
+    @FXML
+    private void handleSeleccionAutor() {
+        Autor autorSeleccionado = autoresTable.getSelectionModel().getSelectedItem();
+        if (autorSeleccionado != null) {
+            nombreField.setText(autorSeleccionado.getNombre());
+            nacionalidadField.setText(autorSeleccionado.getNacionalidad());
+        }
+    }
 
+    @FXML
     private void cargarAutores() {
         List<Autor> autores = autorDAO.listarTodos();
-        System.out.println("Autores cargados después de actualizar: " + autores);
         autoresList.setAll(autores);
     }
 

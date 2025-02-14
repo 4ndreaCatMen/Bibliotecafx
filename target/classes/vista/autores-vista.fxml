@@ -6,7 +6,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.controlador.AutorControlador"
-            prefHeight="400.0" prefWidth="600.0">
+            prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/styles.css">
 
     <VBox spacing="10" alignment="CENTER" layoutX="20" layoutY="20" prefWidth="560">
 
@@ -29,12 +29,13 @@
             <Button text="Agregar" onAction="#agregarAutor" />
             <Button text="Eliminar" onAction="#eliminarAutor" />
             <Button text="Actualizar" onAction="#actualizarAutor" />
+            <Button text="Listar Todos" onAction="#cargarAutores"/>
         </HBox>
 
         <!-- Campo de búsqueda -->
         <HBox spacing="10">
             <TextField fx:id="buscarField" promptText="Buscar por nombre" />
-            <Button fx:id="buscarButton" text="Buscar Autor" />
+            <Button fx:id="buscarButton" text="Buscar Autor" onAction="#buscarAutor"/>
 
         </HBox>
 

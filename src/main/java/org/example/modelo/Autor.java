@@ -2,6 +2,9 @@ package org.example.modelo;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "autores")
@@ -16,6 +19,9 @@ public class Autor {
 
     @Column
     private String nacionalidad;
+
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Libro> libros = new ArrayList<>();
 
     // Constructor vacío obligatorio para Hibernate
     public Autor() {}

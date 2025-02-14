@@ -5,16 +5,26 @@ import org.example.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ILibroDAOImpl implements ILibroDAO {
     @Override
     public void guardar(Libro libro) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.save(libro);
-        tx.commit();
-        session.close();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            session.persist(libro); // Inserta el objeto
+            transaction.commit();
+            System.out.println("Libro guardado: " + libro.getTitulo());
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            System.err.println("Error al guardar libro: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 
     @Override
@@ -45,10 +55,15 @@ public class ILibroDAOImpl implements ILibroDAO {
 
     @Override
     public List<Libro> listarTodos() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Libro> libros = session.createQuery("FROM Libro", Libro.class).list();
-        session.close();
-        return libros;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            session.beginTransaction(); // <-- Añade transacción
+            List<Libro> libros = session.createQuery("FROM Libro", Libro.class).list();
+            session.getTransaction().commit();
+            return libros;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
     @Override

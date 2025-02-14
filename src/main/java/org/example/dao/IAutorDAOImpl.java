@@ -1,6 +1,7 @@
 package org.example.dao;
 
 import org.example.modelo.Autor;
+import org.example.modelo.Libro;
 import org.example.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -24,10 +25,11 @@ public class IAutorDAOImpl implements IAutorDAO {
     public void actualizar(Autor autor) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
-            session.merge(autor); // Usamos merge en lugar de update
+            session.merge(autor); // Usa merge para actualizar
             tx.commit();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException("Error al actualizar autor", e);
         }
     }
 
@@ -35,11 +37,24 @@ public class IAutorDAOImpl implements IAutorDAO {
 
     @Override
     public void eliminar(Autor autor) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        session.delete(autor);
-        tx.commit();
-        session.close();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            // Obtener todos los libros del autor
+            List<Libro> libros = session.createQuery(
+                    "FROM Libro WHERE autor.id = :autorId", Libro.class
+            ).setParameter("autorId", autor.getId()).list();
+
+            // Desvincular autor de los libros
+            for (Libro libro : libros) {
+                libro.setAutor(null);
+                session.merge(libro);
+            }
+
+            // Eliminar autor
+            session.remove(autor);
+            tx.commit();
+        }
     }
 
     @Override
@@ -52,10 +67,15 @@ public class IAutorDAOImpl implements IAutorDAO {
 
     @Override
     public List<Autor> listarTodos() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Autor> autores = session.createQuery("FROM Autor", Autor.class).list();
-        session.close();
-        return autores;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            List<Autor> autores = session.createQuery("FROM Autor", Autor.class).list();
+            session.getTransaction().commit();
+            return autores; // La sesión se cierra automáticamente gracias al try-with-resources
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
     @Override
     public List<Autor> buscarPorNombre(String nombre) {

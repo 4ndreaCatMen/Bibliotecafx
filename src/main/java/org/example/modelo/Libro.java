@@ -105,4 +105,7 @@ public class Libro {
                 ", autor=" + autor.getNombre() +
                 '}';
     }
+
+    public void setDisponible(boolean disponible) {
+    }
 }
